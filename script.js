@@ -72,8 +72,25 @@ function checkUI() {
   }
 }
 
+function filterItems(e) {
+  const filterInput = e.target.value.toLowerCase();
+  const items = itemList.querySelectorAll('li');
+
+  // Loops through all shopping list items. If the input string is not included in a list item then it hides that element (display = none).
+  // If the input string is included in the list item, it sets its display to 'flex' in case it was previously hidden.
+  items.forEach((item) => {
+    const itemName = item.textContent.toLowerCase();
+    if (!itemName.includes(filterInput)) {
+      item.style.display = 'none';
+    } else {
+      item.style.display = 'flex';
+    }
+  });
+}
+
 // Event Listeners
 itemForm.addEventListener('submit', addItem);
 itemList.addEventListener('click', removeItem);
 clearAllButton.addEventListener('click', clearAllItems);
 window.addEventListener('load', checkUI);
+itemFilter.addEventListener('keyup', filterItems);
