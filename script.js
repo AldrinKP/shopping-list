@@ -4,7 +4,17 @@ const itemList = document.getElementById('item-list');
 const clearAllButton = document.getElementById('clear');
 const itemFilter = document.getElementById('filter');
 
-function addItem(e) {
+function displayItemsFromStorage() {
+  const itemsFromStorage = getItemsFromStorage();
+  if (itemsFromStorage.length === 0) {
+    return;
+  } else {
+    itemsFromStorage.forEach((item) => addItemToDOM(item));
+    checkUI();
+  }
+}
+
+function onAddItemSubmit(e) {
   e.preventDefault();
 
   const newItem = itemInput.value;
@@ -15,18 +25,48 @@ function addItem(e) {
     return;
   }
 
+  // Add item to the DOM as a list item
+  addItemToDOM(newItem);
+
+  // Updates localStorage to include new items
+  addItemToStorage(newItem);
+
+  // Checks UI since items have been added
+  checkUI();
+
+  itemInput.value = '';
+}
+
+function addItemToDOM(item) {
   // Create list item
   const li = document.createElement('li');
-  li.appendChild(document.createTextNode(newItem));
+  li.appendChild(document.createTextNode(item));
 
   const button = createButton('remove-item btn-link text-red');
   li.appendChild(button);
 
   itemList.appendChild(li);
+}
 
-  checkUI();
+function addItemToStorage(item) {
+  const itemsFromStorage = getItemsFromStorage();
+  // Add new item to the array, then stringify and set the item to localStorage
+  itemsFromStorage.push(item);
+  localStorage.setItem('items', JSON.stringify(itemsFromStorage));
+}
 
-  itemInput.value = '';
+function getItemsFromStorage() {
+  let itemsFromStorage;
+
+  // If no items stored localStorage, start with a new array
+  if (localStorage.getItem('items') === null) {
+    itemsFromStorage = [];
+  } else {
+    // If there are items in storage, parse it as an array
+    itemsFromStorage = JSON.parse(localStorage.getItem('items'));
+  }
+
+  return itemsFromStorage;
 }
 
 function createButton(classes) {
@@ -60,6 +100,7 @@ function clearAllItems() {
   checkUI();
 }
 
+// Checks whether filter items form and clear all button should be displayed. If no list items, these should not be displayed.
 function checkUI() {
   const items = itemList.querySelectorAll('li');
 
@@ -88,9 +129,15 @@ function filterItems(e) {
   });
 }
 
-// Event Listeners
-itemForm.addEventListener('submit', addItem);
-itemList.addEventListener('click', removeItem);
-clearAllButton.addEventListener('click', clearAllItems);
-window.addEventListener('load', checkUI);
-itemFilter.addEventListener('keyup', filterItems);
+// Initialize app
+function init() {
+  // Event Listeners
+  itemForm.addEventListener('submit', onAddItemSubmit);
+  itemList.addEventListener('click', removeItem);
+  clearAllButton.addEventListener('click', clearAllItems);
+  window.addEventListener('load', checkUI);
+  document.addEventListener('DOMContentLoaded', displayItemsFromStorage);
+  itemFilter.addEventListener('keyup', filterItems);
+}
+
+init();
